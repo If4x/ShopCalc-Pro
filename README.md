@@ -14,7 +14,7 @@ This is a simple, web-based shop calculator running on the ESP32. It's designed 
 # Parts needed
 - ESP32-Dev
 - Basic SPI Micro-SD-Module
-- Micro-SD-Card (recommended 2-8GB since those are cheap but even 2GB is overkill)
+- Micro-SD-Card (recommended 2-8GB since those are cheap but even 2GB is overkill, tested and works with 2GB-32GB)
 
 # Skills needed
 - Being able to type on a computer without breaking your fingers
