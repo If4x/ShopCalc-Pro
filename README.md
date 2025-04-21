@@ -57,6 +57,30 @@ The onboard LED of the ESP is primarily used as a status LED, blinking briefly e
 # Setup
 The system is intended to run on the **ESP32-Dev**. It uses onboard components and a basic/standard Micro-SD module to minimize the required technical skills to nearly zero.
 
+**Building and Soldering**
+Pin connections. (recommended to be soldered)
+| Pin on ESP32 | Pin on SD Module      |
+|--------------|-----------------------|
+| VIN/5V       | VCC                   |
+| GND          | GND                   |
+| D5           | CS                    |
+| D18          | CLK                   |
+| D19          | MISO                  |
+| D23          | MOSI                  |
+Important: Keep in mind that the cables have to be long enogh to be able to "fold" the SD module on the back of the ESP32 but also short enogh so that they can fit into the case.
+
+The case can be printed from the stl files in the case folder [here](https://github.com/If4x/SopCalc-Pro/tree/main/case). The folder also includes pictures for assembly and orientation.
+There are two versions of the case:
+1. Basic Version. Just the Case that fits the two covers. Works perfectly fine
+2. Keychain Version. Has a hole to add a keychain of your choice. Ideal if the System is transported a lot, not as easy to loose.
+
+Recommended Print settings:
+- 3 Wall-lines
+- 4 Layers bottom and top
+- 15% Infil (Pattern of your choice)
+- Support (recommended using organic support, worked the best for me)
+- No brim
+
 **First Power-up**  
 1. Plug the SD card into the SD module.  
 2. Connect the ESP32-Dev to your computer.  
@@ -86,5 +110,3 @@ Now that the system uses an SD card, there are basically no limits on how many p
 # Coming Soon
 - Shortcut on the config page to reset the product list to default.  
 - ESP configuration (Wi-Fi password, name, etc.) saved to a file on the SD card. This would allow someone to create default config files, save them to the SD card, and apply them without modifying the code, enabling even the most inexperienced microcontroller users to make changes to the ESP config.  
-- 3D-Printed case.  
-- Assembly instructions.
