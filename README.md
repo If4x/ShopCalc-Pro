@@ -22,6 +22,7 @@ This is a simple, web-based shop calculator running on the ESP32. It's designed 
 - Utilizes onboard components and an SD module to keep things as simple and easy to build as possible.
 
 **Product Page** (192.168.4.1)  
+<img src="https://github.com/If4x/SopCalc-Pro/blob/main/UI/Shop_page.PNG?raw=true" alt="Image of shop page" height="600">
 - Allows the user to select products ordered by customers.  
 - Buttons for +1, +2, +3 to speed up input.  
 - Color-coded buttons for adding/removing items from the cart for easy and intuitive interaction.  
@@ -32,11 +33,13 @@ This is a simple, web-based shop calculator running on the ESP32. It's designed 
 - Displays the included deposit for glasses and bottles (default: 1€).
 
 **Configuration Page** (192.168.4.1:8080)  
+<img src="https://github.com/If4x/SopCalc-Pro/blob/main/UI/Config_page.PNG?raw=true" alt="Image of config page" height="600">
 - Edit products (name, price, deposit).  
 - Delete products (in case they are no longer used or outdated).  
 - Create new products.
 
 **Sales Page** (192.168.4.1/sales)  
+<img src="https://github.com/If4x/SopCalc-Pro/blob/main/UI/Sales_page.PNG?raw=true" alt="Image of sales page" height="600">
 - Displays total items sold.  
 - Option to export the statistics for later use.  
 - Reset statistics (before or after an event to get accurate results).
