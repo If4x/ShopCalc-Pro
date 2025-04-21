@@ -67,6 +67,7 @@ Pin connections. (recommended to be soldered)
 | D18          | CLK                   |
 | D19          | MISO                  |
 | D23          | MOSI                  |
+
 Important: Keep in mind that the cables have to be long enogh to be able to "fold" the SD module on the back of the ESP32 but also short enogh so that they can fit into the case.
 
 The case can be printed from the stl files in the case folder [here](https://github.com/If4x/SopCalc-Pro/tree/main/case). The folder also includes pictures for assembly and orientation.
@@ -110,3 +111,4 @@ Now that the system uses an SD card, there are basically no limits on how many p
 # Coming Soon
 - Shortcut on the config page to reset the product list to default.  
 - ESP configuration (Wi-Fi password, name, etc.) saved to a file on the SD card. This would allow someone to create default config files, save them to the SD card, and apply them without modifying the code, enabling even the most inexperienced microcontroller users to make changes to the ESP config.  
+- Users log to log who sold what. (Statistical usage)
