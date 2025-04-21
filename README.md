@@ -5,12 +5,6 @@ To address these issues and open up possibilities for future features, a simple 
 
 This is a simple, web-based shop calculator running on the ESP32. It's designed to serve as a basic calculator for school events to optimize the selling process, save time, and minimize calculation errors (which happen more often than one might think when the task is done manually by younger students). It's platform-independent, meaning it runs on all mobile devices (e.g., iOS, Android, ...).
 
-# Features
-**General**  
-- Extremely low power consumption (0.7W), allowing the system to run for days on a standard-sized power bank.  
-- Easy and intuitive to use (seriously, if you can navigate a browser, you can use this).  
-- Utilizes onboard components and an SD module to keep things as simple and easy to build as possible.
-
 # Parts needed
 - ESP32-Dev
 - Basic SPI Micro-SD-Module
@@ -20,6 +14,12 @@ This is a simple, web-based shop calculator running on the ESP32. It's designed 
 - Being able to type on a computer without breaking your fingers
 - Being able to hold a sottering iron in a way that you don't end up cooking your fingers well done
 - Being able to read these instructions
+
+# Features
+**General**  
+- Extremely low power consumption (0.7W), allowing the system to run for days on a standard-sized power bank.  
+- Easy and intuitive to use (seriously, if you can navigate a browser, you can use this).  
+- Utilizes onboard components and an SD module to keep things as simple and easy to build as possible.
 
 **Product Page** (192.168.4.1)  
 - Allows the user to select products ordered by customers.  
