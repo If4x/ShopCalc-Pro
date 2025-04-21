@@ -92,6 +92,7 @@ void error(int number) {
       break;
     default:
       Serial.println("Unknown error!");
+      blinkLED(4);
       break;
   }
 }
