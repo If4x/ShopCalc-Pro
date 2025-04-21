@@ -1,79 +1,90 @@
-# SopCalc Pro
- ShopCalc Pro is a further development of its predecessor system SopCalc (see https://github.com/If4x/ShopCalc). 
- While ShopCalc focused on being usable out of the box without the need of additional modules other than the ESP32. This Restriction resulted in preformance issues when the shop size was increased in a way that EEPROM storage will run out (400 byte in size). On the other hand, EEPROM on ESP32 has very limited write cycles which could result in complete failure at an event when used in the long term.
- To solve those errors and opening up possibilities for future features, a simple SD module is being connected to ESP32 via SPI. 
+# ShopCalc Pro
+ShopCalc Pro is a further development of its predecessor, **ShopCalc** (see [ShopCalc GitHub by If4x](https://github.com/If4x/ShopCalc)).  
+While ShopCalc focused on being usable out of the box without the need for additional modules other than the ESP32, this restriction led to performance issues when the shop size increased to the point where EEPROM storage (400 bytes in size) would run out. On top of that, the ESP32's EEPROM has very limited write cycles, which could result in total failure during an event if used long-term.  
+To address these issues and open up possibilities for future features, a simple SD module is now connected to the ESP32 via SPI.
 
- This is a simple web-based shop calculator running on ESP32. It's intended to serve as a basic calculator for school events to optimize the process of selling products timewise but also to minimize calculation errors occurring quite frequently when performed by head by younger students. It is plattform independent (runs on all mobile devices e.g. iOS, Android, ...). 
+This is a simple, web-based shop calculator running on the ESP32. It's designed to serve as a basic calculator for school events to optimize the selling process, save time, and minimize calculation errors (which happen more often than one might think when the task is done manually by younger students). It's platform-independent, meaning it runs on all mobile devices (e.g., iOS, Android, ...).
 
 # Features
-**General**
-- Extremely low Poweconsumption (0,7W) enabeling the system to run for days while being powered by a regularly sized powerbank
-- Easy and intuitive to use
-- Utilizes onboard components and SD Module in order to be as simple and easy to build as possible
+**General**  
+- Extremely low power consumption (0.7W), allowing the system to run for days on a standard-sized power bank.  
+- Easy and intuitive to use (seriously, if you can navigate a browser, you can use this).  
+- Utilizes onboard components and an SD module to keep things as simple and easy to build as possible.
 
-**Product Page** (192.168.4.1)
-- Let's user select the products ordered by customer
-- buttons for +1, +2, +3 to increase speed for inputting into system
-- colorcoded buttons for adding/removing items from cart for easy and intuitive interaction
-- order submit (saves order to statistic)
-- order delete (if bigger mistakes were made and it's just faster to delete the whole order
-- displays specific amount of ordered items
-- displays total amount
-- displays included deposit for glasses and bottles (default 1€)
+# Parts needed
+- ESP32-Dev
+- Basic SPI Micro-SD-Module
+- Micro-SD-Card (recommended 2-8GB since those are cheap but even 2GB is overkill)
 
-**Configuration Page** (192.168.4.1:8080)
-- Edit Products (name, price, deposit)
-- Delete Products (if no longer used/outdated)
-- Create new product
+# Skills needed
+- Being able to type on a computer without breaking your fingers
+- Being able to hold a sottering iron in a way that you don't end up cooking your fingers well done
+- Being able to read these instructions
 
-**Sales Page** (192.168.4.1/sales)
-- Displays total items sold
-- Option for export of the statistic for later usage
-- Reset statistics (after/before an event to get accurate results)
+**Product Page** (192.168.4.1)  
+- Allows the user to select products ordered by customers.  
+- Buttons for +1, +2, +3 to speed up input.  
+- Color-coded buttons for adding/removing items from the cart for easy and intuitive interaction.  
+- Order submit (saves the order to statistics).  
+- Order delete (in case of "oops, I made a big mistake," and deleting everything is faster).  
+- Displays the specific quantity of ordered items.  
+- Displays the total amount.  
+- Displays the included deposit for glasses and bottles (default: 1€).
 
-**Additional 3D-Printed Case (COMMING SOON)**
-There are STL files for an additional ESP case that has buttons for EN abd BOOT to be able to restart the ESP32. It also has "air vents" for the Processor due to heat generation caused by using the WIFI module actively. It also holds the SD card module.
+**Configuration Page** (192.168.4.1:8080)  
+- Edit products (name, price, deposit).  
+- Delete products (in case they are no longer used or outdated).  
+- Create new products.
 
-**Errorcodes**
-The onboard LED of the ESP is used as status LED in first place and blinks shortly every second. However it also functions as visual Output if something went wrong. It blinks a specific amount of times indicating the error.
+**Sales Page** (192.168.4.1/sales)  
+- Displays total items sold.  
+- Option to export the statistics for later use.  
+- Reset statistics (before or after an event to get accurate results).
 
-| # of blinks  | ERROR                              |
-|--------------|------------------------------------|
-| 1            | SD not found                       |
-| 2            | SD found but unable to initialize  |
-| 3            | SD unable to mount                 |
-| 4            | Unknown Error, check Serial Moitor |
+**Additional 3D-Printed Case (COMING SOON)**  
+There will be STL files for an additional ESP case with buttons for **EN** and **BOOT** to restart the ESP32. It also includes "air vents" for the processor due to heat generated by the active use of the Wi-Fi module and houses the SD card module.
 
+**Error Codes**  
+The onboard LED of the ESP is primarily used as a status LED, blinking briefly every second. However, it also serves as a visual indicator if something went wrong, blinking a specific number of times to signal the error.
+
+| # of blinks | ERROR                              |
+|-------------|------------------------------------|
+| 1           | SD not found                       |
+| 2           | SD found but unable to initialize  |
+| 3           | SD unable to mount                 |
+| 4           | Unknown Error, check Serial Monitor |
 
 # Setup
-The system is intended to run on ESP32-Dev. It uses onboard components and a basic/standard Micro-SD module to minimize the requiered technical sklills to almost zero.
+The system is intended to run on the **ESP32-Dev**. It uses onboard components and a basic/standard Micro-SD module to minimize the required technical skills to nearly zero.
 
-**First Powerup**
-1. Plug SD-Card into SD-Module
-2. Connect ESP32-Dev to computer
-3. Flash main.cpp to ESP32-Dev (recommended using PIO for quick compilation, Arduino IDE works too but slower)
-4. Connect your smartphone to wifi (SSID: Kasse | Password: BitteGeld) Can be modified in the main.cpp code at the beginning of the file
-5. Go to your browser and ytpe 192.168.4.1:80 into the search bar to access shop page
-   Go to your browser and type 192.168.4.1:80/sales to go to the overview page of sold products where you can export this for statistical usage
-   Go to your browser and type 192.168.4.1:8080 into the search bar to access config page And you're done! As simple as this!
-Now you system is ready to go. It created the configuration files on the SD card so it will store the product list & sold units for use after power was disconnected from ESP
+**First Power-up**  
+1. Plug the SD card into the SD module.  
+2. Connect the ESP32-Dev to your computer.  
+3. Flash `main.cpp` to the ESP32-Dev (we recommend using PlatformIO for quick compilation; Arduino IDE works too, but it's slower).  
+4. Connect your smartphone to Wi-Fi (SSID: **Kasse** | Password: **BitteGeld**). This can be modified in the `main.cpp` file at the beginning.  
+5. Open your browser and type `192.168.4.1:80` in the search bar to access the shop page.  
+   For the sales overview page, type `192.168.4.1/sales`. Here you can export your sales data for statistical use.  
+   For the configuration page, type `192.168.4.1:8080`.  
+   And you're done! Simple as that!  
+   Now, your system is ready to go. It has created the configuration files on the SD card, so it will store the product list and sold units even after power is disconnected from the ESP.
 
-**After First Powerup**
-1. Plug SD-Card into SD-Module
-2. Connect ESP32-Dev to Power
-3. Connect to wifi (if not modified, default connection see First Powerup step 3)
-4. Go to your browser and ytpe 192.168.4.1 into the search bar to access shop page
-   Go to your browser and type 192.168.4.1:8080 into the search bar to access config page
-   Go to your browser and type 192.168.4.1/sales to go to the overview page of sold products where you can export this for statistical usage And you're done! As simple as this!
+**After First Power-up**  
+1. Plug the SD card into the SD module.  
+2. Connect the ESP32-Dev to power.  
+3. Connect to Wi-Fi (if not modified, the default connection is as described in the First Power-up steps).  
+4. Open your browser and type `192.168.4.1` to access the shop page.  
+   For the configuration page, type `192.168.4.1:8080`.  
+   For the sales overview page, type `192.168.4.1/sales`.  
+   And again, you're done! Super easy!
 
 # Limitations
-Since the system now uses a SD-card, there are basically no limits on how many products are in your store (if you manage to fill up a 2GB card just with products, I don't know what you're doing but you might consider switching to something professional instead of using this pice of "garbage".)
-**HOWEVER** To increase performance, following limitations were set in the code and can be changed to meet your needs:
-- MAX_PRODUCTS was set to 50, can be increased to increase shop size
-- name[50] limits the length of product names in the shop for better readability. Not recommended to be increased further since usability of the system would decrease pretty soon.
+Now that the system uses an SD card, there are basically no limits on how many products you can have in your store (but seriously, if you manage to fill a 2GB card just with products, you might want to reconsider your life choices—or maybe just upgrade to something more professional instead of using this piece of "garbage").  
+**However**, to improve performance, the following limitations have been set in the code (and can be changed to meet your needs):  
+- **MAX_PRODUCTS** is set to 50 but can be increased for a larger store.  
+- **name[50]** limits the length of product names for better readability. It is not recommended to increase this much further, as the usability of the system would decrease significantly.
 
-# Comming soon
-- Shortcut on config Page to reset product List to default
-- ESP Config (Wifi Password, Name, ...) saved to file on SD. This would enable that somebody just creates config files as their default, saves them to the SD Card and they will be applied without modifying the code enabeling someone unexperienced with microcontrollers to make changes to the ESP config
-- 3D Printed Case
-- Assemly instructions
+# Coming Soon
+- Shortcut on the config page to reset the product list to default.  
+- ESP configuration (Wi-Fi password, name, etc.) saved to a file on the SD card. This would allow someone to create default config files, save them to the SD card, and apply them without modifying the code, enabling even the most inexperienced microcontroller users to make changes to the ESP config.  
+- 3D-Printed case.  
+- Assembly instructions.
