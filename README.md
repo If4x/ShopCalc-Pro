@@ -82,6 +82,10 @@ Recommended Print settings:
 - Support (recommended using organic support, worked the best for me)
 - No brim
 
+**Completed Assembly**
+![Image of complete assembly](https://github.com/If4x/SopCalc-Pro/blob/main/case/Full%20assembly.JPEG)
+
+
 **First Power-up**  
 1. Plug the SD card into the SD module.  
 2. Connect the ESP32-Dev to your computer.  
