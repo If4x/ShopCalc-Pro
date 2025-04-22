@@ -44,6 +44,19 @@ struct Product {
   int sold; // number of products sold (for sales overview)
 };
 
+// colors for serial monitor
+struct Colors {
+  const char* red = "\033[31m"; // red
+  const char* green = "\033[32m"; // green
+  const char* yellow = "\033[33m"; // yellow
+  const char* blue = "\033[34m"; // blue
+  const char* magenta = "\033[35m"; // magenta
+  const char* cyan = "\033[36m"; // cyan
+  const char* white = "\033[37m"; // white
+  const char* reset = "\033[0m"; // reset color
+} colors;
+Colors color; // create color object
+
 Product products[MAX_PRODUCTS]; // Array for products
 int totalSold[MAX_PRODUCTS]; // cumulative number sold per product
 int productCount = 0; // max number of products in the shop
@@ -79,20 +92,24 @@ void error(int number) {
   // switchcase for error handling
   switch (number) {
     case 1:
-      Serial.println("SD card not found!");
+      Serial.println(String(color.red) + "SD card not found!" + String(color.reset));
       blinkLED(1);
       break;
     case 2:
-      Serial.println("SD card not initialized!");
+      Serial.println(String(color.red) + "SD card not initialized!" + String(color.reset));
       blinkLED(2);
       break;
     case 3:
-      Serial.println("SD card not mounted!");
+      Serial.println(String(color.red) + "SD card not mounted!" + String(color.reset));
       blinkLED(3);
       break;
-    default:
-      Serial.println("Unknown error!");
+    case 4:
+      Serial.println(String(color.red) + "File error!" + String(color.reset));
       blinkLED(4);
+      break;
+    default:
+      Serial.println(String(color.red) + "Unknown error!" + String(color.reset));
+      blinkLED(10);
       break;
   }
 }
@@ -103,10 +120,10 @@ void initSD() {
     error(1); // SD card not found
     return;
   }
-  Serial.println("SD card initialized successfully.");
+  Serial.println(String(color.green) + "SD card initialized successfully." + String(color.reset));
   // create file if it does not exist
   if (!SD.exists("/products.csv")) {
-    Serial.println("products.csv not found, creating new file.");
+    Serial.println(String(color.blue) + "No product config found, loading default products." + String(color.reset));
     File file = SD.open("/products.csv", FILE_WRITE);
     if (file) {
       file.println("0"); // write 0 to the file
@@ -116,7 +133,7 @@ void initSD() {
     }
   }
   if (!SD.exists("/sales.csv")) {
-    Serial.println("sales.csv not found, creating new file.");
+    Serial.println(String(color.blue) + "sales.csv not found, creating new file." + String(color.reset));
     File file = SD.open("/sales.csv", FILE_WRITE);
     if (file) {
       file.println("0"); // write 0 to the file
@@ -133,6 +150,7 @@ void saveSalesToSD() {
   File file = SD.open("/sales.csv", FILE_WRITE);
   if (!file) {
     Serial.println("[saveSalesToSD] Failed to open file for writing.");
+    error(4); // file error
     return;
   }
 
@@ -141,13 +159,13 @@ void saveSalesToSD() {
     file.println(totalSold[i]);
   }
   file.close();
-  Serial.println("[saveSalesToSD] Sales data saved to SD card.");
+  Serial.println(String(color.reset) + "[saveSalesToSD] Sales data saved to SD card.");
 }
 
 void loadSalesFromSD() {
   File file = SD.open("/sales.csv");
   if (!file) {
-    Serial.println("[loadSalesFromSD] No sales file found. Initializing empty sales.");
+    Serial.println(String(color.reset) + "[loadSalesFromSD] No sales file found. Initializing empty sales.");
     for (int i = 0; i < productCount; i++) {
       totalSold[i] = 0;
     }
@@ -165,18 +183,19 @@ void loadSalesFromSD() {
     }
   }
   file.close();
-  Serial.println("[loadSalesFromSD] Sales data loaded from SD card.");
+  Serial.println(String(color.reset) + "[loadSalesFromSD] Sales data loaded from SD card.");
 }
 
 void printSDData(char* filename) {
   File file = SD.open(filename);
   if (!file) {
-    Serial.print("[printSDData] Failed to open ");
+    Serial.print("[printSDData] Failed to open file: ");
     Serial.println(filename);
+    error(4); // file error
     return;
   }
-  Serial.print("[printSDData] Contents of ");
-  Serial.println(filename);
+  Serial.print(String(color.blue) + "[printSDData] Contents of: ");
+  Serial.println(filename + String(color.reset));
   while (file.available()) {
     Serial.write(file.read());
   }
@@ -189,6 +208,7 @@ void saveProductsToSD() {
   File file = SD.open("/products.csv", FILE_WRITE);
   if (!file) {
     Serial.println("[saveProductsToSD] Failed to open file for writing.");
+    error(4); // file error
     return;
   }
 
@@ -201,7 +221,7 @@ void saveProductsToSD() {
     file.println(products[i].sold);
   }
   file.close();
-  Serial.println("[saveProductsToSD] Products saved to SD card.");
+  Serial.println(String(color.green) + "[saveProductsToSD] Products saved to SD card." + String(color.reset));
 }
 
 void loadProductsFromSD() {
@@ -234,7 +254,7 @@ void loadProductsFromSD() {
     products[i].sold = parts[4].toInt();
   }
   file.close();
-  Serial.println("[loadProductsFromSD] Products loaded from SD card.");
+  Serial.println(String(color.green) + "[loadProductsFromSD] Products loaded from SD card." + String(color.reset));
 }
 
 void handleSellProduct(String productName) {
@@ -322,12 +342,18 @@ void handleExportSales() {
 
 // Endpoint to handle sales reset
 void handleResetSales() {
+  // Reset the sales data
+  for (int i = 0; i < productCount; i++) {
+    totalSold[i] = 0;
+  }
+  saveSalesToSD(); // Save the reset sales data to SD
+  Serial.println("[handleResetSales] Sales data reset and saved to SD card.");
   
   // Redirect to the sales overview page after resetting
   server.sendHeader("Location", "/sales"); // Redirect to the sales page
   server.send(303); // Send a redirect response
   delay(1000); // Optional delay before restarting
-  ESP.restart(); // Restart the ESP32 to apply changes
+  ESP.restart();
 }
 
 
@@ -364,7 +390,7 @@ String generateProductList() {
 
   // Add fixed footer container
   content += "<div class='fixed-footer'>";
-  content += "<h3 class='bottom-interface'>Gesamtpreis: " + String(calculateTotal(), 2) + " €<br>";
+  content += "<h3 class='bottom-interface'>" + String(calculateTotal(), 2) + " €<br>";
   content += "<small class='bottom-interface'>(inkl. " + String(calculateDeposit(), 2) + " € Pfand)</small></h3>";
   content += "<button class='bottom-interface' onclick='sendAction(\"clear\", -1)'>Warenkorb löschen</button>";
   content += "<button class='bottom-interface' onclick='sendAction(\"checkout\", -1)'>Bestellung abschließen</button>"; // Add the "Bestellung abschließen" button
@@ -392,7 +418,6 @@ String generateConfigPage() {
           max-width: 600px;
           margin: auto;
           padding-bottom: 60px; /* Reserve space for footer */
-          position: relative;
           min-height: 100vh; /* Ensure the body takes at least the full screen height */
         }
 
@@ -443,63 +468,6 @@ String generateConfigPage() {
           margin-top: 20px;
         }
 
-        /* Fixed footer at the bottom of the screen */
-        .fixed-footer {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-          background-color: #f9f9f9;
-          border-top: 1px solid #ccc;
-          padding: 10px;
-          text-align: center;
-          box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .fixed-footer h3 {
-          margin: 0;
-          font-size: 16px;
-        }
-
-        .fixed-footer button {
-          margin-top: 5px;
-          padding: 10px 20px;
-          background-color: #007BFF;
-          color: white;
-          border-radius: 10px;
-          border: none;
-          cursor: pointer;
-        }
-
-        .fixed-footer button:hover {
-          background-color: #0056b3;
-        }
-
-        .fixed-footer button:last-child {
-          background-color: #28a745; /* Different color for the "Bestellung abschließen" button */
-        }
-
-        .fixed-footer button:last-child:hover {
-          background-color: #218838;
-        }
-
-        /* Allow scrolling content, but always show footer */
-        .content-wrapper {
-          margin-bottom: 60px; /* Make space for the fixed footer */
-        }
-
-        h3.bottom-interface {
-          margin: 0;
-          padding: 0;
-        }
-        
-        .bottom-interface {
-        // close together to save space
-          margin: 0 0;
-          padding: 0 0;
-          background-color: #007BFF;
-
-        }
       </style>
     </head>
     <body>
@@ -570,11 +538,19 @@ void handleRoot() {
         margin-top: 0;
         padding-top: 0;
       }
+
+      .product p {
+        // add space between border and text
+        margin-top: 10px;
+        margin-bottom: 0;
+        padding-top: 10px;
+      }
       .row {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-top: 5px;
+        padding: 0;
       }
       .left {
         display: flex;
@@ -612,6 +588,48 @@ void handleRoot() {
         border: none;
         margin-top: 20px;
       }
+
+
+
+
+      /* Fixed footer at the bottom of the screen */
+      .fixed-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        background-color: #f9f9f9;
+        border-top: 1px solid #ccc;
+        padding: 5px;
+        text-align: center;
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .fixed-footer h3 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .fixed-footer button {
+        //margin-top: 5px;
+        //padding: 5px 5px;
+        background-color: red;
+        color: white;
+        border-radius: 10px;
+        border: none;
+        //cursor: pointer;
+      }
+
+      .fixed-footer button:last-child {
+        background-color: #007BFF;
+      }
+
+      /* Allow scrolling content, but always show footer */
+      .content-wrapper {
+        margin-bottom: 70px; /* Make space for the fixed footer */
+      }
+
+
     </style>
     <script>
       function updateContent(){
@@ -679,35 +697,40 @@ void handleSubmit() {
 
 // update content of product page when action was performed by client (add, remove, clear)
 void handleContent() {
-  String content = "";
+  String content = "<div class='content-wrapper'>"; // Begin content wrapper
+
+  // repeated for the number of products in the shop
   for (int i = 0; i < productCount; i++) {
     content += "<div class='product'>";
-    content += "<p><strong>" + String(products[i].name) + "</strong> (" + String(products[i].price, 2) + " €";
+    content += "<p style='margin-top: 0;'><strong>" + String(products[i].name) + "</strong> (" + String(products[i].price, 2) + " €";
     if (products[i].hasDeposit) content += " + 1 € Pfand";
     content += ")</p>";
     content += "<div class='row'><div class='left'>";
     content += "<span>Anzahl: " + String(products[i].count) + "</span>";
-    content += "<button onclick='sendAction(\"add\", " + String(i) + ", 1)' class='button-green'>+1</button>";
-    content += "<button onclick='sendAction(\"add\", " + String(i) + ", 2)' class='button-green'>+2</button>";
-    content += "<button onclick='sendAction(\"add\", " + String(i) + ", 3)' class='button-green'>+3</button>";
+
+    // add product buttons
+    content += "<button onclick='sendAction(\"add\", " + String(i) + ", 1)' style='background-color: green; color: white;'>+1</button>"; // +1 Button
+    content += "<button onclick='sendAction(\"add\", " + String(i) + ", 2)' style='background-color: green; color: white;'>+2</button>"; // +2 Button
+    content += "<button onclick='sendAction(\"add\", " + String(i) + ", 3)' style='background-color: green; color: white;'>+3</button>"; // +3 Button
+
     content += "</div>";
-    content += "<button onclick='sendAction(\"remove\", " + String(i) + ")' class='button-red'>-1</button>";
-    content += "</div></div>";
+
+    // -1 button on the right side of the row
+    content += "<button onclick='sendAction(\"remove\", " + String(i) + ")' style='background-color: red; color: white;'>-1</button>";
+
+    content += "</div>"; // line end
+    content += "</div>"; // product block end
   }
 
-  content += "<h3>Gesamtpreis: " + String(calculateTotal(), 2) + " €<br>";
-  content += "<small>(inkl. " + String(calculateDeposit(), 2) + " € Pfand)</small></h3>";
-  // submit button to finalize the order and send it to the server to be saved to SD
-  content += "<button onclick='sendAction(\"submit\", -1)' style='background-color: blue; color: white; width: 100%; padding: 15px; font-size: 1.2em; margin-top: 10px;'>Bestellung abschließen</button>";
+  content += "</div>"; // End content wrapper
 
-  // clear button to clear the cart
-  content += "<div style='text-align: center; margin-top: 10px;'>";
-  content += "<button class='clear-button' onclick='sendAction(\"clear\", -1)' style='padding: 8px 16px; font-size: 1em;'>Warenkorb löschen</button>";
-  content += "</div>";
-
-  content +="<footer style='text-align: center; margin-top: 20px; font-size: 12px; color: #888;'>";
-  content += "&copy; 2025 Imanuel Fehse | Alle Rechte vorbehalten.";
-  content += "</footer>";
+  // Add fixed footer container
+  content += "<div class='fixed-footer'>";
+  content += "<h3 class='bottom-interface'>" + String(calculateTotal(), 2) + " €<br>";
+  content += "<small class='bottom-interface'>(inkl. " + String(calculateDeposit(), 2) + " € Pfand)</small></h3>";
+  content += "<button class='bottom-interface' onclick='sendAction(\"clear\", -1)'>Warenkorb löschen</button>";
+  content += "<button class='bottom-interface' onclick='sendAction(\"checkout\", -1)'>Bestellung abschließen</button>"; // Add the "Bestellung abschließen" button
+  content += "</div>"; // End of footer container
 
   server.send(200, "text/html", content);
 }
@@ -785,7 +808,8 @@ void setup() {
   // Serial and Wifi Module
   Serial.begin(115200);
   WiFi.softAP(ssid, password);
-  Serial.println("AP IP: " + WiFi.softAPIP().toString());
+  Serial.println(String(color.blue) + "AP IP: " + WiFi.softAPIP().toString() + String(color.reset));
+  Serial.println(String(color.blue) + "AP SSID: " + ssid + String(color.reset));
   initSD(); // initialize SD card
 
   loadProductsFromSD();
@@ -796,10 +820,10 @@ void setup() {
     }
     productCount = defaultProductCount;
     saveProductsToSD();
-    saveSalesToSD();  // Verkäufe auch initialisieren
+    saveSalesToSD();  
   }
 
-  loadSalesFromSD(); // Beispiel-Funktion, die du schreiben musst
+  loadSalesFromSD(); 
 
 
   // Port 80
@@ -827,10 +851,14 @@ void setup() {
 
   server.begin();       // launch product page server so client can request page
   configServer.begin(); // launch config page server so client can request page
-  Serial.println("servers started");
+  Serial.println(String(color.green) + "servers started successfully" + String(color.reset));
 
   Serial.println("product page running on port 80");
   Serial.println("config page running on port 8080");
+
+  Serial.println("\n " + String(color.green) + "Setup complete." + String(color.reset));
+  Serial.println("Waiting for client requests...\n");
+
 }
 
 
@@ -845,7 +873,7 @@ void loop() {
     ledOn = true;
   }
 
-  // LED kurz anlassen (z. B. 100 ms), dann wieder aus
+  // LED blinking
   if (ledOn && millis() - previousMillis >= 100) {
     digitalWrite(LED_PIN, LOW);   // LED aus
     ledOn = false;
