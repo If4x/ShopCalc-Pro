@@ -78,6 +78,10 @@ Product defaultProducts[] = {
 const int defaultProductCount = 9; // number of default products
 
 
+///////////////////////
+// General Functions //
+///////////////////////
+
 void blinkLED(int number) {
   for (int i = 0; i < number; i++) {
     digitalWrite(LED_PIN, HIGH); // LED an
@@ -114,6 +118,11 @@ void error(int number) {
   }
 }
 
+
+//////////////////
+// SD handeling //
+//////////////////
+
 // initialize SD card
 void initSD() {
   if (!SD.begin(SD_CS)) {
@@ -143,8 +152,6 @@ void initSD() {
     }
   }
 }
-
-
 
 void saveSalesToSD() {
   File file = SD.open("/sales.csv", FILE_WRITE);
@@ -202,8 +209,6 @@ void printSDData(char* filename) {
   file.close();
 }
 
-
-// save to SD
 void saveProductsToSD() {
   File file = SD.open("/products.csv", FILE_WRITE);
   if (!file) {
@@ -256,6 +261,11 @@ void loadProductsFromSD() {
   file.close();
   Serial.println(String(color.green) + "[loadProductsFromSD] Products loaded from SD card." + String(color.reset));
 }
+
+
+/////////////////////////////////
+// Handler Functions (Backend) //
+/////////////////////////////////
 
 void handleSellProduct(String productName) {
   for (int i = 0; i < productCount; i++) {
@@ -352,14 +362,127 @@ void handleResetSales() {
   // Redirect to the sales overview page after resetting
   server.sendHeader("Location", "/sales"); // Redirect to the sales page
   server.send(303); // Send a redirect response
-  delay(1000); // Optional delay before restarting
-  ESP.restart();
+}
+
+// add, remove, clear product functions
+void handleAdd() {
+  int id = server.arg("id").toInt();
+  int q = server.arg("quantity").toInt();
+  if (id >= 0 && id < productCount) products[id].count += q;
+  server.send(200, "text/plain", "OK");
+}
+
+// remove product from cart
+void handleRemove() {
+  int id = server.arg("id").toInt();
+  if (id >= 0 && id < productCount && products[id].count > 0) products[id].count--;
+  server.send(200, "text/plain", "OK");
+}
+
+// clear all products in cart
+void handleClear() {
+  for (int i = 0; i < productCount; i++) products[i].count = 0;
+  server.send(200, "text/plain", "OK");
+}
+
+// submit order to server and save to SD
+void handleSubmit() {
+  for (int i = 0; i < productCount; i++) {
+    totalSold[i] += products[i].count;
+    products[i].count = 0;
+  }
+  saveSalesToSD();
+  server.send(200, "text/plain", "OK");
+
+  // Verkäufe aktualisieren (already handled above)
+
+  saveSalesToSD(); // Deine Funktion zum Speichern der Verkäufe
+}
+
+void handleResetProducts() {
+  // delete all products without overwriting with default products
+  for (int i = 0; i < productCount; i++) {
+    products[i] = {};
+    totalSold[i] = 0;
+  }
+
+  // Reset to default products
+  productCount = defaultProductCount;
+  for (int i = 0; i < productCount; i++) {
+    products[i] = defaultProducts[i];
+    totalSold[i] = 0;
+  }
+
+  // Save to SD
+  saveProductsToSD();
+  saveSalesToSD();
+
+  Serial.println("[handleResetProducts] Products reset to defaults.");
+
+  // Redirect back to config page
+  configServer.sendHeader("Location", "/");
+  configServer.send(303);
+}
+
+// delete product from SD and update product list
+void handleDeleteProduct() {
+  int id = configServer.arg("id").toInt();
+
+  // Ensure the ID is within valid range
+  if (id >= 0 && id < productCount) {
+    // Shift products and sales data
+    for (int i = id; i < productCount - 1; i++) {
+      products[i] = products[i + 1];
+      totalSold[i] = totalSold[i + 1]; // shift sales too
+    }
+
+    // Clear the last product for cleanup (optional)
+    Product emptyProduct = {};
+    products[productCount - 1] = emptyProduct;
+    totalSold[productCount - 1] = 0;
+
+    // Decrease the product count
+    productCount--;
+
+    // Save the updated products and sales to SD
+    saveProductsToSD();
+    saveSalesToSD();
+  }
+
+  // Send success response to the client
+  configServer.send(200, "text/plain", "OK");
+}
+
+// save new product to SD and update product list
+void handleSaveConfig() {
+  for (int i = 0; i < productCount; i++) {
+    if (configServer.hasArg("name_" + String(i))) {
+      String name = configServer.arg("name_" + String(i));
+      name.toCharArray(products[i].name, sizeof(products[i].name));
+      products[i].price = configServer.arg("price_" + String(i)).toFloat();
+      products[i].hasDeposit = configServer.hasArg("deposit_" + String(i));
+    }
+  }
+  if (configServer.hasArg("new_name") && configServer.arg("new_name").length() > 0 && productCount < MAX_PRODUCTS) {
+    String name = configServer.arg("new_name");
+    name.toCharArray(products[productCount].name, sizeof(products[productCount].name));
+    products[productCount].price = configServer.arg("new_price").toFloat();
+    products[productCount].hasDeposit = configServer.hasArg("new_deposit");
+    products[productCount].count = 0;
+    productCount++;
+  }
+  saveProductsToSD();
+  configServer.sendHeader("Location", "/");
+  configServer.send(303);
 }
 
 
+////////////////////////////////
+// HTML AND CSS (UI/Frontend) //
+////////////////////////////////
 
-// HTML for product page
-// HTML for product page
+
+// product page
 String generateProductList() {
   String content = "<div class='content-wrapper'>"; // Begin content wrapper
 
@@ -386,6 +509,13 @@ String generateProductList() {
     content += "</div>"; // product block end
   }
 
+  // Footer with copyright
+  content += "<footer style='text-align: center; margin-top: 20px; font-size: 12px; color: #888;'>";
+  content += "&copy; 2025 Imanuel Fehse | Alle Rechte vorbehalten.";
+  // Link to the MIT license
+  content += "<br><a href='/license' style='color: #007BFF; text-decoration: none;'>MIT Lizenz</a>";
+  content += "</footer>";
+
   content += "</div>"; // End content wrapper
 
   // Add fixed footer container
@@ -398,8 +528,6 @@ String generateProductList() {
 
   return content;
 }
-
-
 
 // configuration page HTML
 String generateConfigPage() {
@@ -498,17 +626,44 @@ String generateConfigPage() {
 
   html += "<script>function deleteProduct(id){fetch('/deleteProduct?id='+id).then(()=>location.reload());}</script>"; // delete product script for button (references the function in the HTML))
 
+  // Reset to default products button
+  html += "<form action='/resetProducts' method='post'>";
+  html += "<button type='submit' style='background-color: red; color: white;'>Zurücksetzen auf Standardprodukte</button>";
+  html += "</form>";
+
   // footer with copyright 
   html += "<footer style='text-align: center; margin-top: 20px; font-size: 12px; color: #888;'>";
   html += "&copy; 2025 Imanuel Fehse | Alle Rechte vorbehalten.";
+  // Link to the MIT license
+  html += "<br><a href='/license' style='color: #007BFF; text-decoration: none;'>MIT Lizenz</a>";
   html += "</footer>";
   html += "</body></html>";
   return html;
 }
 
+// MIT License
+String getMITLicense() {
+  return 
+    "MIT License\n\n"
+    "Copyright (c) 2025 Imanuel Fehse\n\n"
+    "Permission is hereby granted, free of charge, to any person obtaining a copy "
+    "of this software and associated documentation files (the \"Software\"), to deal "
+    "in the Software without restriction, including without limitation the rights "
+    "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell "
+    "copies of the Software, and to permit persons to whom the Software is "
+    "furnished to do so, subject to the following conditions:\n\n"
+    "The above copyright notice and this permission notice shall be included in all "
+    "copies or substantial portions of the Software.\n\n"
+    "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR "
+    "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, "
+    "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE "
+    "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER "
+    "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, "
+    "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE "
+    "SOFTWARE.\n";
+}
 
-// WEB SERVER HANDLER FUNCTIONS
-// Port 80 product page
+// product page
 void handleRoot() {
   // HTML template for the product page
   loadSalesFromSD(); // load sales from SD
@@ -659,42 +814,6 @@ void handleRoot() {
   server.send(200, "text/html", html); // send HTML to client
 }
 
-// add, remove, clear product functions
-void handleAdd() {
-  int id = server.arg("id").toInt();
-  int q = server.arg("quantity").toInt();
-  if (id >= 0 && id < productCount) products[id].count += q;
-  server.send(200, "text/plain", "OK");
-}
-
-// remove product from cart
-void handleRemove() {
-  int id = server.arg("id").toInt();
-  if (id >= 0 && id < productCount && products[id].count > 0) products[id].count--;
-  server.send(200, "text/plain", "OK");
-}
-
-// clear all products in cart
-void handleClear() {
-  for (int i = 0; i < productCount; i++) products[i].count = 0;
-  server.send(200, "text/plain", "OK");
-}
-
-// submit order to server and save to SD
-void handleSubmit() {
-  for (int i = 0; i < productCount; i++) {
-    totalSold[i] += products[i].count;
-    products[i].count = 0;
-  }
-  saveSalesToSD();
-  server.send(200, "text/plain", "OK");
-
-  // Verkäufe aktualisieren (already handled above)
-
-  saveSalesToSD(); // Deine Funktion zum Speichern der Verkäufe
-}
-
-
 // update content of product page when action was performed by client (add, remove, clear)
 void handleContent() {
   String content = "<div class='content-wrapper'>"; // Begin content wrapper
@@ -722,6 +841,13 @@ void handleContent() {
     content += "</div>"; // product block end
   }
 
+  // Footer with copyright
+  content += "<footer style='text-align: center; margin-top: 20px; font-size: 12px; color: #888;'>";
+  content += "&copy; 2025 Imanuel Fehse | Alle Rechte vorbehalten.";
+  // Link to the MIT license
+  content += "<br><a href='/license' style='color: #007BFF; text-decoration: none;'>MIT Lizenz</a>";
+  content += "</footer>";
+
   content += "</div>"; // End content wrapper
 
   // Add fixed footer container
@@ -735,68 +861,18 @@ void handleContent() {
   server.send(200, "text/html", content);
 }
 
-
-
-
-
 // Port 8080 configuration page
 void handleConfig() {
   configServer.send(200, "text/html", generateConfigPage()); // send HTML to client
 }
 
-// save configuration page
-// save new product to SD and update product list
-void handleSaveConfig() {
-  for (int i = 0; i < productCount; i++) {
-    if (configServer.hasArg("name_" + String(i))) {
-      String name = configServer.arg("name_" + String(i));
-      name.toCharArray(products[i].name, sizeof(products[i].name));
-      products[i].price = configServer.arg("price_" + String(i)).toFloat();
-      products[i].hasDeposit = configServer.hasArg("deposit_" + String(i));
-    }
-  }
-  if (configServer.hasArg("new_name") && configServer.arg("new_name").length() > 0 && productCount < MAX_PRODUCTS) {
-    String name = configServer.arg("new_name");
-    name.toCharArray(products[productCount].name, sizeof(products[productCount].name));
-    products[productCount].price = configServer.arg("new_price").toFloat();
-    products[productCount].hasDeposit = configServer.hasArg("new_deposit");
-    products[productCount].count = 0;
-    productCount++;
-  }
-  saveProductsToSD();
-  configServer.sendHeader("Location", "/");
-  configServer.send(303);
-}
 
-// delete product from SD and update product list
-void handleDeleteProduct() {
-  int id = configServer.arg("id").toInt();
 
-  // Ensure the ID is within valid range
-  if (id >= 0 && id < productCount) {
-    // Shift products and sales data
-    for (int i = id; i < productCount - 1; i++) {
-      products[i] = products[i + 1];
-      totalSold[i] = totalSold[i + 1]; // shift sales too
-    }
 
-    // Clear the last product for cleanup (optional)
-    Product emptyProduct = {};
-    products[productCount - 1] = emptyProduct;
-    totalSold[productCount - 1] = 0;
 
-    // Decrease the product count
-    productCount--;
-
-    // Save the updated products and sales to SD
-    saveProductsToSD();
-    saveSalesToSD();
-  }
-
-  // Send success response to the client
-  configServer.send(200, "text/plain", "OK");
-}
-
+////////////////////////
+// Routines and Setup //
+////////////////////////
 
 
 // SETUP
@@ -836,18 +912,27 @@ void setup() {
   server.on("/sales", handleSalesOverview);
   server.on("/resetSales", HTTP_POST, handleResetSales);
   server.on("/exportSales", HTTP_POST, handleExportSales);
-  server.onNotFound([]() {
-    server.send(404, "text/plain", "404 Not Found");
+  server.on("/license", []() {
+    String licenseText = getMITLicense();
+    server.send(200, "text/plain", licenseText);
   });
-
-  
-  
+  server.onNotFound([]() {
+    server.send(404, "text/plain", "404 Not Found\nEither you typed Port/IP wrong or my code is shit... Might actually be my bad...\n\nBack to <a href='/'>home</a>");
+  });
 
 
   // Port 8080
   configServer.on("/", handleConfig);
   configServer.on("/saveConfig", HTTP_POST, handleSaveConfig);
   configServer.on("/deleteProduct", handleDeleteProduct);
+  configServer.on("/resetProducts", HTTP_POST, handleResetProducts);
+  configServer.on("/license", []() {
+    String licenseText = getMITLicense();
+    configServer.send(200, "text/plain", licenseText);
+  });
+  configServer.onNotFound([]() {
+    configServer.send(404, "text/plain", "404 Not Found\nEither you typed Port/IP wrong or my code is shit... Might actually be my bad...\n\nBack to <a href='/'>home</a>");
+  });
 
   server.begin();       // launch product page server so client can request page
   configServer.begin(); // launch config page server so client can request page
