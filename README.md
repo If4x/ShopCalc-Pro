@@ -37,6 +37,7 @@ This is a simple, web-based shop calculator running on the ESP32. It's designed 
 - Edit products (name, price, deposit).  
 - Delete products (in case they are no longer used or outdated).  
 - Create new products.
+- Reset the products to default products.
 
 **Sales Page** (192.168.4.1/sales)  
 <img src="https://github.com/If4x/SopCalc-Pro/blob/main/UI/Sales_page.PNG?raw=true" alt="Image of sales page" height="600">
@@ -120,6 +121,5 @@ Now that the system uses an SD card, there are basically no limits on how many p
 - **name[50]** limits the length of product names for better readability. It is not recommended to increase this much further, as the usability of the system would decrease significantly.
 
 # Coming Soon
-- Shortcut on the config page to reset the product list to default.  
 - ESP configuration (Wi-Fi password, name, etc.) saved to a file on the SD card. This would allow someone to create default config files, save them to the SD card, and apply them without modifying the code, enabling even the most inexperienced microcontroller users to make changes to the ESP config.  
 - Users log to log who sold what. (Statistical usage)
