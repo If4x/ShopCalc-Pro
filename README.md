@@ -5,6 +5,9 @@ To address these issues and open up possibilities for future features, a simple 
 
 This is a simple, web-based shop calculator running on the ESP32. It's designed to serve as a basic calculator for school events to optimize the selling process, save time, and minimize calculation errors (which happen more often than one might think when the task is done manually by younger students). It's platform-independent, meaning it runs on all mobile devices (e.g., iOS, Android, ...).
 
+>[!CAUTION]
+> This is a DIY project. Although the skills required to replicate this project are considered to be fairly low for people that have handled electronics before, this might still be complicated to unexperienced people. be careful to not burn yourself when soldering and check for short circuits (e.g. with a powerbank) before connecting the ESP32 to your computer again to prevent damage to your computer.
+
 # Parts needed
 - ESP32-Dev
 - Basic SPI Micro-SD-Module
