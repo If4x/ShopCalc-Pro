@@ -34,7 +34,7 @@ ShopCalc Pro is a further and more advanced development of its predecessor, **Sh
 While ShopCalc focused on being usable out of the box without the need for additional modules other than the ESP32, this restriction led to performance issues when the shop size increased to the point where EEPROM storage (400 bytes in size) would run out. On top of that, the ESP32's EEPROM has very limited write cycles, which could result in total failure during an event if used long-term.  
 To address these issues and open up possibilities for future features, a simple SD module is now connected to the ESP32 via SPI.
 
-This is a simple, web-based shop calculator running on the ESP32. It's designed to serve as a basic calculator for school events to optimize the selling process, save time, and minimize calculation errors (which happen more often than one might think when the task is done manually by younger students). It's platform-independent, meaning it runs on all mobile devices (e.g., iOS, Android, ...).
+This is a simple, web-based shop calculator running on the ESP32. It's designed to serve as a basic calculator for school events to optimize the selling process, save time, and minimize calculation errors (which happen more often than one might think when the task is done manually by younger students). It's platform-independent, meaning it runs on all mobile devices (e.g., iOS, Android, ...). Additionally, it is about the size of a regular car key and can easily be carried around in a pocket which makes it with it's own WIFI and platform independendece a very versatile tool that has been proven to be very useful at many events.
 
 These instructions are written in a way that everybody (also unexperienced people) are able to replecate this themselves. This  shows in a way that there is very detailed information that is unneccessary for experienced people but good to know for unexperienced people.
 
@@ -97,7 +97,7 @@ Pin connections. (recommended to be soldered)
 
 Important: Keep in mind that the cables have to be long enogh to be able to "fold" the SD module on the back of the ESP32 but also short enogh so that they can fit into the case.
 
-![Image visualizing the cable lenth needed](https://github.com/If4x/SopCalc-Pro/blob/main/case/Cable%20length.JPEG)
+<img src="https://github.com/If4x/ShopCalc-Pro/blob/main/case/Cable%20length.JPEG" alt="Visualisation of cable length" width="300">
 
 
 ### Additional 3D-Printed Case  
@@ -116,7 +116,7 @@ Recommended Print settings:
 - No brim
 
 ### Completed Assembly
-![Image of complete assembly](https://github.com/If4x/SopCalc-Pro/blob/main/case/Full%20assembly.JPEG)
+<img src="https://github.com/If4x/SopCalc-Pro/blob/main/case/Full%20assembly.JPEG" alt="Image of completed assebly in case" width="450">
 
 ## Programming the ESP and Startup
 ### First Power-up
@@ -153,7 +153,7 @@ The onboard LED of the ESP is primarily used as a status LED, blinking briefly e
 When problem cannot befixed by rebooting (pressing the EN button) or powercycling, please check Serial monitor with the [reader script](https://github.com/If4x/SopCalc-Pro/blob/main/serial_reader/reader.py) for more detaild debuggin information. Adjust the COM Port in the reader script to your needs. Additionally, the serial output is colorcoded for better redability and incsreased efficiency while troubleshooting.
 
 Example CLI readout from COM port after rebooting:
-<img src="https://github.com/If4x/SopCalc-Pro/blob/main/UI/Serial_troubleshooting.png?raw=true" alt="Image of serial output while troubleshooting" width="300">
+<img src="https://github.com/If4x/SopCalc-Pro/blob/main/UI/Serial_troubleshooting.png?raw=true" alt="Image of serial output while troubleshooting" width="450">
 
 ## Limitations
 Now that the system uses an SD card, there are basically no limits on how many products you can have in your store (but seriously, if you manage to fill a 2GB card just with products, you might want to reconsider your life choices—or maybe just upgrade to something more professional instead of using this piece of "garbage").  
