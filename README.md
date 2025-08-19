@@ -15,16 +15,16 @@
    - [Product Page](#product-page-19216841)  
    - [Configuration Page](#configuration-page-192168418080)  
    - [Sales Page](#sales-page-19216841sales)  
-3. [Build it yourself](#build-it-yourself)  
-   - [Parts needed](#parts-needed)  
-   - [Skills needed](#skills-needed)  
-   - [Building and Soldering](#building-and-soldering)  
+3. [Build it Yourself](#build-it-yourself)  
+   - [Parts Needed](#parts-needed)  
+   - [Skills Needed](#skills-needed)  
+   - [Pin Connections / Pin Map](#pin-connections--pin-map)  
    - [Additional 3D-Printed Case](#additional-3d-printed-case)  
    - [Completed Assembly](#completed-assembly)  
-4. [Setup](#setup)  
+4. [Programming the ESP and Startup](#programming-the-esp-and-startup)  
    - [First Power-up](#first-power-up)  
    - [After First Power-up](#after-first-power-up)  
-5. [Error Codes and troubleshooting](#error-codes-and-troubleshooting)  
+5. [Troubleshooting](#troubleshooting)  
 6. [Limitations](#limitations)  
 7. [Coming Soon](#coming-soon)  
 
@@ -57,6 +57,7 @@ These instructions are written in a way that everybody (also unexperienced peopl
 
 ### Configuration Page (192.168.4.1:8080)  
 <img src="https://github.com/If4x/SopCalc-Pro/blob/main/UI/Config_page.PNG?raw=true" alt="Image of config page" height="400">
+
 - Edit products (name, price, deposit).  
 - Delete products (in case they are no longer used or outdated).  
 - Create new products.
@@ -64,42 +65,26 @@ These instructions are written in a way that everybody (also unexperienced peopl
 
 ### Sales Page (192.168.4.1/sales)  
 <img src="https://github.com/If4x/SopCalc-Pro/blob/main/UI/Sales_page.PNG?raw=true" alt="Image of sales page" height="400">
+
 - Displays total items sold.  
 - Option to export the statistics for later use.  
 - Reset statistics (before or after an event to get accurate results).
 
 # Build it yourself
 
-## Parts needed
+### Parts needed
 - ESP32-Dev
 - Basic SPI Micro-SD-Module
 - Micro-SD-Card (recommended 2-8GB since those are cheap but even 2GB is overkill, tested and works with 2GB-32GB)
 
-## Skills needed
+### Skills needed
 - Being able to type on a computer without breaking your fingers
 - Being able to hold a sottering iron in a way that you don't end up cooking your fingers well done
 - Being able to read these instructions
 
-**Error Codes and troubleshooting**  
-The onboard LED of the ESP is primarily used as a status LED, blinking briefly every second. However, it also serves as a visual indicator if something went wrong, blinking a specific number of times to signal the error.
-
-| # of blinks | ERROR                                 |
-|-------------|---------------------------------------|
-| 1           | SD not found                          |
-| 2           | SD found but unable to initialize     |
-| 3           | SD unable to mount                    |
-| 4           | File error read/write                 |
-| 10          | Unknown Error, check Serial Monitor   |
-
-When problem cannot befixed by rebooting (pressing the EN button) or powercycling, please check Serial monitor with the [reader script](https://github.com/If4x/SopCalc-Pro/blob/main/serial_reader/reader.py) for more detaild debuggin information. Adjust the COM Port in the reader script to your needs. Additionally, the serial output is colorcoded for better redability and incsreased efficiency while troubleshooting.
-
-Example CLI readout from COM port after rebooting:
-<img src="https://github.com/If4x/SopCalc-Pro/blob/main/UI/Serial_troubleshooting.png?raw=true" alt="Image of serial output while troubleshooting" width="300">
-
-# Setup
 The system is intended to run on the **ESP32-Dev**. It uses onboard components and a basic/standard Micro-SD module to minimize the required technical skills to nearly zero.
 
-**Building and Soldering**
+### Pin connections / Pin Map
 Pin connections. (recommended to be soldered)
 | Pin on ESP32 | Pin on SD Module      |
 |--------------|-----------------------|
@@ -111,7 +96,8 @@ Pin connections. (recommended to be soldered)
 | D23          | MOSI                  |
 
 Important: Keep in mind that the cables have to be long enogh to be able to "fold" the SD module on the back of the ESP32 but also short enogh so that they can fit into the case.
-![IImage visualizing the cable lenth needed](https://github.com/If4x/SopCalc-Pro/blob/main/case/Cable%20length.JPEG)
+
+![Image visualizing the cable lenth needed](https://github.com/If4x/SopCalc-Pro/blob/main/case/Cable%20length.JPEG)
 
 
 ### Additional 3D-Printed Case  
@@ -129,11 +115,11 @@ Recommended Print settings:
 - Support (recommended using organic support)
 - No brim
 
-**Completed Assembly**
+### Completed Assembly
 ![Image of complete assembly](https://github.com/If4x/SopCalc-Pro/blob/main/case/Full%20assembly.JPEG)
 
-
-**First Power-up**  
+## Programming the ESP and Startup
+### First Power-up
 1. Plug the SD card into the SD module.  
 2. Connect the ESP32-Dev to your computer.  
 3. Flash `main.cpp` to the ESP32-Dev (we recommend using PlatformIO for quick compilation; Arduino IDE works too, but it's slower).  
@@ -144,7 +130,7 @@ Recommended Print settings:
    And you're done! Simple as that!  
    Now, your system is ready to go. It has created the configuration files on the SD card, so it will store the product list and sold units even after power is disconnected from the ESP.
 
-**After First Power-up**  
+### After First Power-up
 1. Plug the SD card into the SD module.  
 2. Connect the ESP32-Dev to power.  
 3. Connect to Wi-Fi (if not modified, the default connection is as described in the First Power-up steps).  
@@ -153,12 +139,28 @@ Recommended Print settings:
    For the sales overview page, type `192.168.4.1/sales`.  
    And again, you're done! Super easy!
 
-# Limitations
+## Troubleshooting 
+The onboard LED of the ESP is primarily used as a status LED, blinking briefly every second. However, it also serves as a visual indicator if something went wrong, blinking a specific number of times to signal the error.
+
+| # of blinks | ERROR                                 |
+|-------------|---------------------------------------|
+| 1           | SD not found                          |
+| 2           | SD found but unable to initialize     |
+| 3           | SD unable to mount                    |
+| 4           | File error read/write                 |
+| 10          | Unknown Error, check Serial Monitor   |
+
+When problem cannot befixed by rebooting (pressing the EN button) or powercycling, please check Serial monitor with the [reader script](https://github.com/If4x/SopCalc-Pro/blob/main/serial_reader/reader.py) for more detaild debuggin information. Adjust the COM Port in the reader script to your needs. Additionally, the serial output is colorcoded for better redability and incsreased efficiency while troubleshooting.
+
+Example CLI readout from COM port after rebooting:
+<img src="https://github.com/If4x/SopCalc-Pro/blob/main/UI/Serial_troubleshooting.png?raw=true" alt="Image of serial output while troubleshooting" width="300">
+
+## Limitations
 Now that the system uses an SD card, there are basically no limits on how many products you can have in your store (but seriously, if you manage to fill a 2GB card just with products, you might want to reconsider your life choices—or maybe just upgrade to something more professional instead of using this piece of "garbage").  
 **However**, to improve performance, the following limitations have been set in the code (and can be changed to meet your needs):  
 - **MAX_PRODUCTS** is set to 50 but can be increased for a larger store.  
 - **name[50]** limits the length of product names for better readability. It is not recommended to increase this much further, as the usability of the system would decrease significantly.
 
-# Coming Soon
+## Coming Soon
 - ESP configuration (Wi-Fi password, name, etc.) saved to a file on the SD card. This would allow someone to create default config files, save them to the SD card, and apply them without modifying the code, enabling even the most inexperienced microcontroller users to make changes to the ESP config.  
 - Users log to log who sold what. (Statistical usage)
